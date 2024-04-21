@@ -16,6 +16,7 @@ DOMAIN,api.ipify.org
 
 # my domain
 DOMAIN-SUFFIX,jingwl.top
+DOMAIN-SUFFIX,jingwl.cn
 
 # things3 cloud 
 DOMAIN-SUFFIX,culturedcode.com
