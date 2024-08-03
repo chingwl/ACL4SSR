@@ -1,3 +1,6 @@
+name: 添加系统 DNS 服务器
+desc: 添加系统 DNS 服务器
+
 dns:
   default-nameserver:
     - system
