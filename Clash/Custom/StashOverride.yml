@@ -1,0 +1,5 @@
+dns:
+  default-nameserver:
+    - system
+  nameserver:
+    - system
