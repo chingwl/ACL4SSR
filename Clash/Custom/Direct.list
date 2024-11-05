@@ -19,7 +19,7 @@ DOMAIN-SUFFIX,jingwl.top
 DOMAIN-SUFFIX,jingwl.cn
 
 # things3 cloud 
-DOMAIN-SUFFIX,culturedcode.com
+# DOMAIN-SUFFIX,culturedcode.com
 
 # media api
 DOMAIN,api.e.qq.com
