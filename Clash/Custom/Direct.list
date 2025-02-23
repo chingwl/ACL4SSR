@@ -1,29 +1,8 @@
-
-# youyuan
-DOMAIN-SUFFIX,youyuan.com
-DOMAIN-SUFFIX,youyuan.com.cn
-DOMAIN-SUFFIX,youyuan.cn
-DOMAIN-SUFFIX,youyuan-inc.com
-DOMAIN-SUFFIX,51lianai.net
-DOMAIN-SUFFIX,qiujiaoyou.net
-DOMAIN-SUFFIX,lover2.net
-DOMAIN-SUFFIX,yyipa.com
-DOMAIN-SUFFIX,youyuan-inc.com
-
-# ip
-DOMAIN-KEYWORD,ipv6
-DOMAIN,api.ipify.org
-
 # my domain
-DOMAIN-SUFFIX,jingwl.top
 DOMAIN-SUFFIX,jingwl.cn
 
 # things3 cloud 
 # DOMAIN-SUFFIX,culturedcode.com
-
-# media api
-DOMAIN,api.e.qq.com
-DOMAIN,developers.e.qq.com
 
 # qc
 DOMAIN-SUFFIX,quickconnect.to
@@ -31,7 +10,6 @@ DOMAIN-SUFFIX,quickconnect.cn
 
 # api key 
 DOMAIN-SUFFIX,xty.app
-DOMAIN-SUFFIX,ehco-relay.cc
 
 # juchats.com
 DOMAIN-SUFFIX,juchats.com
