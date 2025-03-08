@@ -9,11 +9,6 @@ DOMAIN-SUFFIX,881889.xyz
 DOMAIN-SUFFIX,quickconnect.to
 DOMAIN-SUFFIX,quickconnect.cn
 
-# api key 
-DOMAIN,one-api.881889.xyz
-DOMAIN,open-webui.881889.xyz
-DOMAIN-SUFFIX,xty.app
-
 # juchats.com
 DOMAIN-SUFFIX,juchats.com
 
