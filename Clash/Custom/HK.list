@@ -1,2 +1,7 @@
 # tailscale
 IP-CIDR,100.88.88.0/24,no-resolve
+
+DOMAIN,portainer.jingwl.cn
+DOMAIN,bw.jingwl.cn
+DOMAIN,freshrss.jingwl.cn
+DOMAIN,open-webui.jingwl.cn
