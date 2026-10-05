@@ -552,6 +552,7 @@ payload:
   - DOMAIN-SUFFIX,c-est-simple.com
   - DOMAIN-SUFFIX,c-span.org
   - DOMAIN-SUFFIX,c-spanvideo.org
+  - DOMAIN-SUFFIX,c.go-mpulse.net
   - DOMAIN-SUFFIX,c.mi.com
   - DOMAIN-SUFFIX,c2cx.com
   - DOMAIN-SUFFIX,c3pool.com
@@ -698,6 +699,7 @@ payload:
   - DOMAIN-SUFFIX,chinesegay.org
   - DOMAIN-SUFFIX,chinesen.de
   - DOMAIN-SUFFIX,chinesenews.net.au
+  - DOMAIN-SUFFIX,chineseposters.net
   - DOMAIN-SUFFIX,chineseradioseattle.com
   - DOMAIN-SUFFIX,chineseupress.com
   - DOMAIN-SUFFIX,chingcheong.com
@@ -1341,6 +1343,7 @@ payload:
   - DOMAIN-SUFFIX,futustatic.com
   - DOMAIN-SUFFIX,fututrade.com
   - DOMAIN-SUFFIX,fututrustee.com
+  - DOMAIN-SUFFIX,fuyin116.com
   - DOMAIN-SUFFIX,fw.cm
   - DOMAIN-SUFFIX,fxcm-chinese.com
   - DOMAIN-SUFFIX,fxnetworks.com
@@ -2501,6 +2504,7 @@ payload:
   - DOMAIN-SUFFIX,mubi.com
   - DOMAIN-SUFFIX,mullvad.net
   - DOMAIN-SUFFIX,multiply.com
+  - DOMAIN-SUFFIX,muse.ai
   - DOMAIN-SUFFIX,music.amazon.com
   - DOMAIN-SUFFIX,musixmatch.com
   - DOMAIN-SUFFIX,muzi.com
@@ -2630,6 +2634,7 @@ payload:
   - DOMAIN-SUFFIX,nordstromrack.com
   - DOMAIN-SUFFIX,nordvpn.com
   - DOMAIN-SUFFIX,nos.nl
+  - DOMAIN-SUFFIX,note.com
   - DOMAIN-SUFFIX,notepad-plus-plus.org
   - DOMAIN-SUFFIX,nottinghampost.com
   - DOMAIN-SUFFIX,now.com
@@ -2974,6 +2979,7 @@ payload:
   - DOMAIN-SUFFIX,qianmo.tw
   - DOMAIN-SUFFIX,qiwen.lu
   - DOMAIN-SUFFIX,qmp4.com
+  - DOMAIN-SUFFIX,qobuz.com
   - DOMAIN-SUFFIX,qoos.com
   - DOMAIN-SUFFIX,qq.co.za
   - DOMAIN-SUFFIX,qstatus.com
@@ -3212,6 +3218,7 @@ payload:
   - DOMAIN-SUFFIX,simplex.chat
   - DOMAIN-SUFFIX,sina.com.hk
   - DOMAIN-SUFFIX,sinchew.com.my
+  - DOMAIN-SUFFIX,sing-box.sagernet.org
   - DOMAIN-SUFFIX,singaporepools.com.sg
   - DOMAIN-SUFFIX,singlelogin.se
   - DOMAIN-SUFFIX,singtao.com
@@ -3853,6 +3860,7 @@ payload:
   - DOMAIN-SUFFIX,vansky.com
   - DOMAIN-SUFFIX,vaticannews.va
   - DOMAIN-SUFFIX,vatn.org
+  - DOMAIN-SUFFIX,vava8.com
   - DOMAIN-SUFFIX,vcf-online.org
   - DOMAIN-SUFFIX,vcfbuilder.org
   - DOMAIN-SUFFIX,veed.io
@@ -3954,6 +3962,7 @@ payload:
   - DOMAIN-SUFFIX,wainao.me
   - DOMAIN-SUFFIX,walletconnect.com
   - DOMAIN-SUFFIX,walletconnect.org
+  - DOMAIN-SUFFIX,wallhaven.cc
   - DOMAIN-SUFFIX,wallmama.com
   - DOMAIN-SUFFIX,wallpapercasa.com
   - DOMAIN-SUFFIX,wallsttv.com
