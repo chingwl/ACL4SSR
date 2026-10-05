@@ -234,7 +234,8 @@ DOMAIN-SUFFIX,bitbrowser.net
 - `live.com`、`microsoft.com` 使用 `PROXY`，其中先命中 AI 规则的 Copilot 子域名例外使用 `US`；`office365.com`、`outlook.com` 等仍沿用已有直连策略。
 - Talkatone 业务域名、通话地址及 `tenor.com` 使用 `Talkatone` 组；列出的广告域名使用 `REJECT`。HTTP/3、QUIC 拦截规则被注释，未启用。
 - 国内直连规则补充了阿里云、百度网盘、Bilibili 视频、抖音及字节资源、腾讯邮箱、微信、开发与知识网站等常用域名，以及京东、快手、爱奇艺、大众点评、腾讯云、七牛、国内公共资源和验证码服务的相关域名，主要依据仓库的 `ChinaDomain.list`，并非全量合并。爱奇艺域名修正为 `71.am`；搜狐相关的 `v-56.com` 保持原有正确配置。
-- 运营商一键登录补充 `cmpassport.com`、`id6.me` 后缀及 `enrichgw.10010.com`、`nishub1.10010.com` 精确域名直连，来源为 `Ruleset/ChinaOneKeyLogin.list`；不保证登录一定成功，实际仍取决于蜂窝网络和应用实现。
+- Bilibili 视频 CDN 精确域名 `upos-hz-mirrorakam.akamaized.net` 使用 `DIRECT`，来源为 `Ruleset/Bilibili.list`；该规则先于后置的 `DOMAIN-KEYWORD,aka,PROXY`，避免视频资源被关键词规则分流到代理。
+- 运营商一键登录补充 `cmpassport.com`、`id6.me`、`mob.com` 后缀及 `enrichgw.10010.com`、`nishub1.10010.com` 精确域名直连，来源为 `Ruleset/ChinaOneKeyLogin.list`；不保证登录一定成功，实际仍取决于蜂窝网络和应用实现。
 - `adspower.net`、`bitbrowser.net` 后缀使用 `PROXY`，同步自 `Custom/Proxy.list`，先于国内域名和 `GEOIP,CN` 直连规则，避免解析到国内 IP 时被判为直连。
 - `quickconnect.to`、`juchats.com` 使用 `DIRECT`；`quickconnect.cn` 已由 `.cn` 后缀直连规则覆盖。群晖的 `synology.com`、`synology.me` 后缀使用 `DIRECT`，分别依据 `ChinaDomain.list`、`UnBan.list`；若使用海外 NAS，应将 `synology.me` 规则缩小为需要直连的具体主机名。
 - GitHub 明确覆盖 `github.com`、`github.io`、`githubapp.com`、`githubassets.com`、`githubusercontent.com` 并使用 `PROXY`；Copilot 的前置精确规则例外使用 `US`。Docker 的 `docker.com`、`docker.io`、`dockerhub.com`、`compose-spec.io` 使用 `PROXY`。
