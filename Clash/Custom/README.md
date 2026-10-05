@@ -233,8 +233,10 @@ DOMAIN-SUFFIX,bitbrowser.net
 - AI 规则先于 Microsoft、Google 和通用代理规则，避免 Gemini、Copilot 等先命中其他策略。ChatGPT 原有依赖域名及 IP 规则也改为 `US`；其中包含 `auth0.com`、`sentry.io`、`stripe.com` 等共享服务，其他应用访问这些匹配目标时也会使用美国组，并非仅影响 AI 请求。
 - `live.com`、`microsoft.com` 使用 `PROXY`，其中先命中 AI 规则的 Copilot 子域名例外使用 `US`；`office365.com`、`outlook.com` 等仍沿用已有直连策略。
 - Talkatone 业务域名、通话地址及 `tenor.com` 使用 `Talkatone` 组；列出的广告域名使用 `REJECT`。HTTP/3、QUIC 拦截规则被注释，未启用。
-- 国内直连规则补充了阿里云、百度网盘、Bilibili 视频、抖音及字节资源、腾讯邮箱、微信、开发与知识网站等常用域名，主要依据仓库的 `ChinaDomain.list`，并非全量合并。爱奇艺域名修正为 `71.am`；搜狐相关的 `v-56.com` 保持原有正确配置。
-- `quickconnect.to`、`juchats.com` 使用 `DIRECT`；`quickconnect.cn` 已由 `.cn` 后缀直连规则覆盖。
+- 国内直连规则补充了阿里云、百度网盘、Bilibili 视频、抖音及字节资源、腾讯邮箱、微信、开发与知识网站等常用域名，以及京东、快手、爱奇艺、大众点评、腾讯云、七牛、国内公共资源和验证码服务的相关域名，主要依据仓库的 `ChinaDomain.list`，并非全量合并。爱奇艺域名修正为 `71.am`；搜狐相关的 `v-56.com` 保持原有正确配置。
+- 运营商一键登录补充 `cmpassport.com`、`id6.me` 后缀及 `enrichgw.10010.com`、`nishub1.10010.com` 精确域名直连，来源为 `Ruleset/ChinaOneKeyLogin.list`；不保证登录一定成功，实际仍取决于蜂窝网络和应用实现。
+- `adspower.net`、`bitbrowser.net` 后缀使用 `PROXY`，同步自 `Custom/Proxy.list`，先于国内域名和 `GEOIP,CN` 直连规则，避免解析到国内 IP 时被判为直连。
+- `quickconnect.to`、`juchats.com` 使用 `DIRECT`；`quickconnect.cn` 已由 `.cn` 后缀直连规则覆盖。群晖的 `synology.com`、`synology.me` 后缀使用 `DIRECT`，分别依据 `ChinaDomain.list`、`UnBan.list`；若使用海外 NAS，应将 `synology.me` 规则缩小为需要直连的具体主机名。
 - GitHub 明确覆盖 `github.com`、`github.io`、`githubapp.com`、`githubassets.com`、`githubusercontent.com` 并使用 `PROXY`；Copilot 的前置精确规则例外使用 `US`。Docker 的 `docker.com`、`docker.io`、`dockerhub.com`、`compose-spec.io` 使用 `PROXY`。
 - 非 AI 的 Google、YouTube 使用 `Google` 组，Telegram 使用 `TG` 组，两组均可手动选择 `HK` 或 `US`。`googleapis.cn`、`gstatic.cn` 仍优先命中 `.cn` 后缀直连规则，未改为代理。
 - 苹果资源、本地域名、IPv4 局域网与保留地址、IPv6 的 `::1/128`、`fc00::/7`、`fe80::/10` 以及 `GEOIP,CN` 使用 `DIRECT`，IP 规则使用 `no-resolve`。其他已列出的社交平台等仍使用 `PROXY`。
