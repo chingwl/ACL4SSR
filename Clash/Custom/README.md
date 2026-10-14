@@ -12,6 +12,7 @@
 | [HK.list](HK.list) | 规则列表 | Tailscale 地址段及指定自建服务 | 绑定香港节点组，部分域名被前置规则覆盖 |
 | [JP.list](JP.list) | 规则列表 | 指定使用日本出口的域名 | 绑定日本节点组 |
 | [LoadBalance.list](LoadBalance.list) | 规则列表 | 翻译服务等负载均衡候选规则 | 主配置中的引用和策略组均未启用 |
+| [Oracle.list](Oracle.list) | 规则列表 | Oracle 甲骨文各产品线与历史品牌域名 | 绑定全球直连组，排在 ProxyGFWlist 之前 |
 | [Proxy.list](Proxy.list) | 规则列表 | 指定使用代理的域名 | 绑定节点选择组 |
 | [Shadowrocket_Personal.conf](Shadowrocket_Personal.conf) | Shadowrocket 配置 | 独立的基础设置、策略组和完整分流规则 | 不由主 `.ini` 引用 |
 | [StashOverride.yml](StashOverride.yml) | Stash 覆写配置 | 将 DNS 服务器设置为系统 DNS | 独立使用 |
@@ -199,7 +200,25 @@ DOMAIN,get-client-ip.jingwl.cn
 
 主配置中的对应 `ruleset` 和“🔮 负载均衡”组均被注释，因此该文件当前不参与主配置分流。仅修改此文件不会启用负载均衡。
 
-### 7. Proxy.list
+### 7. Oracle.list
+
+将 197 个 Oracle 甲骨文域名及其子域名交给“🎯 全球直连”组，按产品线分为四组：
+
+| 分组 | 条数 | 说明 |
+| --- | --- | --- |
+| 核心品牌与官网 | 36 | `oracle.com`、`oraclecloud.com`、各国站点 `oracle.<cc>`、`oracle.cn`、`oracle.com.cn` 等 |
+| 应用与数据库产品 | 86 | `netsuite.com`、`taleo.net`、`peoplesoft.com`、`siebel.com`、`micros.com`、`dyn.com`、`texturacorp.com` 等 Oracle 已收购产品域名 |
+| 开发者与开源项目 | 22 | `java.com`、`mysql.com`、`sun.com`、`virtualbox.org`、`netbeans.org`、`lustre.org` 等 |
+| 历史业务与客户门户 | 53 | 证书日志中仍解析、但已不发新证书的历史品牌与客户门户，如 `think.com`、`compendium.com`、`mvtresearch.com`、`toadirect.com` |
+
+- 域名来源为 v2fly `domain-list-community`、MetaCubeX `meta-rules-dat`、blackmatrix7 `ios_rule_script` 等公开规则集，叠加 crt.sh 证书透明度日志枚举，并经 Oracle 权威 NS（`ns*.dns.oraclecloud.net`、`akam.net`）与 A 记录存活校验。
+- 证书日志中 229 个根域里有 32 个未收录：已停售、转入第三方或不再解析，如 `cerner.com`、`netbeans.org`、`openoffice.org`、`lustre.org`、`oracle.com.cn`、`upshot.com`、`rsys*.net`。
+- 营销与广告技术类域名（`eloqua.com`、`responsys.net`、`addthis.com`、`bluekai.com`、`moatads.com`、`maxymiser.*`、`elqsandbox.com` 等 32 条）**未纳入**：仓库 `BanAD.list` 已对其中部分域名下发 `REJECT`，纳入直连会使其降级为直连。
+- **顺序注意：** 主配置中该规则集排在 `ProxyGFWlist.list` 之前，这一点是必需的：`ProxyGFWlist.list` 含 `DOMAIN-SUFFIX,uk`、`jp`、`hk`、`sg`、`eu`、`us`、`ca` 等国家级后缀规则，会抢先匹配 `netsuite.co.uk`、`netsuite.jp`、`netsuite.com.hk`、`netsuite.com.sg`、`netsuite.eu`、`netsuite.ca`、`oracle-is.jp`、`otn-shop.jp`、`livelook.us`、`microsdc.us`、`rfer.us`、`simphony.eu` 等 12 个域名。
+- 同时 `ProxyGFWlist.list` 原有的 `# Oracle Cloud` 段（`cloud.oracle.com`、`oraclecloud.com`）已移除，两处调整缺一不可。
+- Oracle 官方 IP 段（`public_ip_ranges.json`，1107 条 CIDR，含 `OCI`/`OSN`/`OBJECT_STORAGE` 标签）未纳入：OCI 计算与对象存储 IP 由多租户共享，按 IP 分流可能命中非 Oracle 流量。
+
+### 8. Proxy.list
 
 将以下域名及其子域名交给“🚀 节点选择”组：
 
@@ -210,7 +229,7 @@ DOMAIN-SUFFIX,bitbrowser.net
 
 主配置最先加载该规则集，使这些域名优先进入节点选择组，不被后续国内域名或国内 IP 规则判定为直连。
 
-### 8. Shadowrocket_Personal.conf
+### 9. Shadowrocket_Personal.conf
 
 独立的 Shadowrocket 配置，不是 Clash 配置，也不依赖本目录的 `.list` 文件。
 
@@ -234,6 +253,7 @@ DOMAIN-SUFFIX,bitbrowser.net
 - `live.com`、`microsoft.com` 使用 `PROXY`，其中先命中 AI 规则的 Copilot 子域名例外使用 `US`；`office365.com`、`outlook.com` 等仍沿用已有直连策略。
 - Talkatone 业务域名、通话地址及 `tenor.com` 使用 `Talkatone` 组；列出的广告域名使用 `REJECT`。HTTP/3、QUIC 拦截规则被注释，未启用。
 - 国内直连规则补充了阿里云、百度网盘、Bilibili 视频、抖音及字节资源、腾讯邮箱、微信、开发与知识网站等常用域名，以及京东、快手、爱奇艺、大众点评、腾讯云、七牛、国内公共资源和验证码服务的相关域名，主要依据仓库的 `ChinaDomain.list`，并非全量合并。爱奇艺域名修正为 `71.am`；搜狐相关的 `v-56.com` 保持原有正确配置。
+- Oracle 甲骨文规则与 `Custom/Oracle.list` 内容一致，共 197 条，接入国内直连块末尾；原单条 `oracle.com` 直连规则已并入该段，`oraclecloud.com`（原由 `ProxyGFWlist.list` 提供代理）改为直连，不再受 `FINAL,PROXY` 影响。
 - Bilibili 视频 CDN 精确域名 `upos-hz-mirrorakam.akamaized.net` 使用 `DIRECT`，来源为 `Ruleset/Bilibili.list`；该规则先于后置的 `DOMAIN-KEYWORD,aka,PROXY`，避免视频资源被关键词规则分流到代理。
 - 运营商一键登录补充 `cmpassport.com`、`id6.me`、`mob.com` 后缀及 `enrichgw.10010.com`、`nishub1.10010.com` 精确域名直连，来源为 `Ruleset/ChinaOneKeyLogin.list`；不保证登录一定成功，实际仍取决于蜂窝网络和应用实现。
 - `adspower.net`、`bitbrowser.net` 后缀使用 `PROXY`，同步自 `Custom/Proxy.list`，先于国内域名和 `GEOIP,CN` 直连规则，避免解析到国内 IP 时被判为直连。
@@ -247,7 +267,7 @@ DOMAIN-SUFFIX,bitbrowser.net
 
 文件不包含具体节点定义，需要配合 Shadowrocket 中已有的节点或订阅。`HK`、`US` 分别按节点名称中的 `HK`、`US` 筛选，默认选择名称分别为 `自建|HK-直连`、`自建|US-DMIT-直连`；筛选条件不验证实际出口地区，AI 使用美国出口的前提是 `US` 组中选中了实际美国节点。此配置与 `.ini + .list` 方案存在差异，不应视为两份完全等价的分流配置。
 
-### 9. StashOverride.yml
+### 10. StashOverride.yml
 
 Stash 的系统 DNS 覆写配置：
 
