@@ -98,7 +98,7 @@ https://raw.githubusercontent.com/chingwl/ACL4SSR/master/Clash/Custom/ACL4SSR_On
 
 | 策略组 | 类型 | 可选项或筛选方式 |
 | --- | --- | --- |
-| 🚀 节点选择 | `select` | 美国、香港、日本、自建、机场、链式代理组 |
+| 🚀 节点选择 | `select` | 美国、香港、日本、台湾、自建、机场、链式代理组 |
 | Ⓜ️ 微软服务 | `select` | 节点选择、`DIRECT` |
 | 📹 油管视频 | `select` | 名称匹配 `ZGO` 的节点、美国组、香港组、节点选择 |
 | 📲 电报消息 | `select` | 美国组、香港组、节点选择 |
@@ -108,6 +108,7 @@ https://raw.githubusercontent.com/chingwl/ACL4SSR/master/Clash/Custom/ACL4SSR_On
 | 🇺🇲 美国节点 | `select` | 名称匹配“美”、美国城市名、`US`、`United States` 等 |
 | 🇭🇰 香港节点 | `select` | 名称匹配“港”、`HK`、`hk`、`Hong Kong` 等 |
 | 🇯🇵 日本节点 | `select` | 名称匹配“日本”、东京、大阪、`JP`、`Japan` 等 |
+| 🇨🇳 台湾节点 | `select` | 名称匹配“台”、新北、彰化、`TW`、`Taiwan` 等 |
 | ME 自建节点 | `select` | 名称包含“自建” |
 | 🐱 机场节点 | `select` | 名称包含 `SakuraCat` |
 | 🔗 链式代理 | `relay` | 依次使用机场节点组、自建节点组 |
@@ -127,7 +128,7 @@ overwrite_original_rules=true
 
 即启用规则生成，并覆盖原配置中的规则。
 
-台湾、韩国、新加坡等自动测速组、家宽组、负载均衡组，以及末尾的 DNS、TUN 模板配置均被注释，不会生效。
+韩国、新加坡等自动测速组、家宽组、负载均衡组，以及末尾的 DNS、TUN 模板配置均被注释，不会生效。
 
 ### 2. AiChat.list
 
@@ -236,7 +237,7 @@ DOMAIN-SUFFIX,bitbrowser.net
 | 配置段 | 内容 |
 | --- | --- |
 | `[General]` | 系统绕过、DNS、IPv6、TUN 排除路由和 UDP 行为等 |
-| `[Proxy Group]` | `HK`、`US` 按节点名称筛选；`Google`、`TG` 可选香港或美国；`Talkatone` 只使用美国组；五个组均为手动选择组 |
+| `[Proxy Group]` | `HK`、`US`、`TW`、`JP` 按节点名称筛选；`Bybit` 使用台湾组；`Google`、`TG` 可选香港或美国；`Talkatone` 只使用美国组；八个组均为手动选择组 |
 | `[Rule]` | 自定义地区分流、广告拦截、国内外服务、局域网及兜底规则 |
 | `[Host]` | `localhost = 127.0.0.1` |
 | `[URL Rewrite]` | 将匹配的 `g.cn`、`google.cn` 请求以 HTTP 302 重定向到 Google |
@@ -246,7 +247,7 @@ DOMAIN-SUFFIX,bitbrowser.net
 - DNS 和备用 DNS 均使用 `system`；启用 IPv6，但不优先使用 IPv6。
 - 配置了部分私有、保留地址的 TUN 排除路由；`100.64.0.0/10` 不在排除列表中，以便由规则处理 Tailscale 特例。策略不支持 UDP 转发时拒绝该流量。
 - 开启直连域名解析失败时使用代理规则的回退行为。
-- `infini.money` 使用 `HK`；整个 `881889.xyz` 域名后缀使用 `US`，其中包括 `searxng.881889.xyz`。当前没有 `JP` 策略组。
+- `infini.money` 使用 `HK`；整个 `881889.xyz` 域名后缀使用 `US`，其中包括 `searxng.881889.xyz`。`JP` 组按节点名称筛选，当前规则中未引用。
 - `100.88.88.0/24` 和指定自建服务使用 `HK`，其中额外包含 `yy-dm.jingwl.cn`。香港网段特例先于后面的 `100.64.0.0/10,DIRECT`，其余该网段地址默认直连。
 - AI 规则统一绑定 `US`，覆盖 ChatGPT、Sora、Claude、Gemini、NotebookLM、Copilot、Cursor、OpenRouter、Perplexity、Coze、Grok 等已列出的服务及相关接口。国内的 `qwen.ai` 单独配置为 `DIRECT`。
 - AI 规则先于 Microsoft、Google 和通用代理规则，避免 Gemini、Copilot 等先命中其他策略。ChatGPT 原有依赖域名及 IP 规则也改为 `US`；其中包含 `auth0.com`、`sentry.io`、`stripe.com` 等共享服务，其他应用访问这些匹配目标时也会使用美国组，并非仅影响 AI 请求。
