@@ -236,7 +236,7 @@ DOMAIN-SUFFIX,bitbrowser.net
 
 | 配置段 | 内容 |
 | --- | --- |
-| `[General]` | 系统绕过、DNS、IPv6、TUN 排除路由和 UDP 行为等 |
+| `[General]` | 系统绕过、DNS、Fake-IP 例外、IPv6、TUN 排除路由和 UDP 行为等 |
 | `[Proxy Group]` | `HK`、`US`、`TW`、`JP` 按节点名称筛选；`Bybit` 使用台湾组；`Google`、`TG` 可选香港或美国；`Talkatone` 只使用美国组；八个组均为手动选择组 |
 | `[Rule]` | 自定义地区分流、广告拦截、国内外服务、局域网及兜底规则 |
 | `[Host]` | `localhost = 127.0.0.1` |
@@ -245,10 +245,11 @@ DOMAIN-SUFFIX,bitbrowser.net
 关键设置与分流：
 
 - DNS 和备用 DNS 均使用 `system`；启用 IPv6，但不优先使用 IPv6。
-- 配置了部分私有、保留地址的 TUN 排除路由；`100.64.0.0/10` 不在排除列表中，以便由规则处理 Tailscale 特例。策略不支持 UDP 转发时拒绝该流量。
+- 配置了部分私有、保留地址的 TUN 排除路由；`100.64.0.0/10` 刻意不在排除列表中，tailnet 路由需留在本隧道内，排除会使内置 Tailscale 模组失效。策略不支持 UDP 转发时拒绝该流量。
+- `always-real-ip = *.jingwl.cn,jingwl.cn`：Fake-IP 例外，仅在选择 Fake-IP 时生效；返回的 `100.88.88.x` 真实地址是 tailnet 路由的依据；该键是 Shadowrocket 的唯一写法，不存在 `fake-ip-filter`。
 - 开启直连域名解析失败时使用代理规则的回退行为。
-- `infini.money` 使用 `HK`；整个 `881889.xyz` 域名后缀使用 `US`，其中包括 `searxng.881889.xyz`。`JP` 组按节点名称筛选，当前规则中未引用。
-- `100.88.88.0/24` 和指定自建服务使用 `HK`，其中额外包含 `yy-dm.jingwl.cn`。香港网段特例先于后面的 `100.64.0.0/10,DIRECT`，其余该网段地址默认直连。
+- `infini.money` 使用 `US`；整个 `881889.xyz` 域名后缀使用 `US`，其中包括 `searxng.881889.xyz`。`JP` 组按节点名称筛选，当前规则中未引用。
+- `100.88.88.0/24`、`ts.net` 后缀和四个 tailnet 域名使用 `TAILSCALE`（`portainer`、`bw`、`yy-dm` 解析到 `100.88.88.3`，`freshrss` 解析到 `100.88.88.8`）；`open-webui.jingwl.cn` 解析为公网 `39.105.83.184`，沿用 `US`。该网段特例先于后面的 `100.64.0.0/10,DIRECT`，其余 CGNAT 地址默认直连。IP 规则使用 `no-resolve`，用于覆盖 App 直接按 IP 访问的场景。
 - AI 规则统一绑定 `US`，覆盖 ChatGPT、Sora、Claude、Gemini、NotebookLM、Copilot、Cursor、OpenRouter、Perplexity、Coze、Grok 等已列出的服务及相关接口。国内的 `qwen.ai` 单独配置为 `DIRECT`。
 - AI 规则先于 Microsoft、Google 和通用代理规则，避免 Gemini、Copilot 等先命中其他策略。ChatGPT 原有依赖域名及 IP 规则也改为 `US`；其中包含 `auth0.com`、`sentry.io`、`stripe.com` 等共享服务，其他应用访问这些匹配目标时也会使用美国组，并非仅影响 AI 请求。
 - `live.com`、`microsoft.com` 使用 `PROXY`，其中先命中 AI 规则的 Copilot 子域名例外使用 `US`；`office365.com`、`outlook.com` 等仍沿用已有直连策略。
@@ -264,7 +265,7 @@ DOMAIN-SUFFIX,bitbrowser.net
 - 苹果资源、本地域名、IPv4 局域网与保留地址、IPv6 的 `::1/128`、`fc00::/7`、`fe80::/10` 以及 `GEOIP,CN` 使用 `DIRECT`，IP 规则使用 `no-resolve`。其他已列出的社交平台等仍使用 `PROXY`。
 - 最终规则为 `FINAL,PROXY`，未命中前面规则的流量使用代理。
 
-**Tailscale 使用前提：** `HK` 中选中的代理服务器必须能够路由到 `100.88.88.0/24`；本机配置不会自动建立 Tailscale 网络连接。已移除该网段被整个 `100.64.0.0/10` TUN 排除项绕过的配置冲突，但系统路由、其他 VPN 和客户端实际接管行为仍需实机验证。导入后建议分别测试 `100.88.88.x` 使用 `HK`、该 `/10` 内其他地址使用 `DIRECT`，并检查自建服务、AI 服务和 IPv6 局域网的匹配日志。
+**Tailscale 使用前提：** 需在 **设置 → Tailscale** 启用全局隧道模组（≥ 2.2.89，需填认证密钥或登录）；模组开关属于 App 设置，配置文件无法写入，导入后仍需手动开启。模组承担 tailnet 路由，因此 `100.64.0.0/10` 不能出现在 `tun-excluded-routes`，官方手册亦有同样提示；若该网段被排除，`TAILSCALE` 策略与自建服务均不可达。iOS/macOS 同时只能有一个活动 VPN，所以不要再另开 Tailscale App；若 NAS 是通过子网路由接入的，需另开启模组的「使用 Tailscale 子网」。导入后建议验证：`portainer.jingwl.cn` 命中 `TAILSCALE`、`100.88.88.3` 可达、`open-webui.jingwl.cn` 仍命中 `US`、AI 与国内分流不受影响；未命中规则的其他 CGNAT 地址由后置 `100.64.0.0/10,DIRECT` 兜底。系统路由与实际接管行为仍需实机日志确认。
 
 文件不包含具体节点定义，需要配合 Shadowrocket 中已有的节点或订阅。`HK`、`US` 分别按节点名称中的 `HK`、`US` 筛选，默认选择名称分别为 `自建|HK-直连`、`自建|US-DMIT-直连`；筛选条件不验证实际出口地区，AI 使用美国出口的前提是 `US` 组中选中了实际美国节点。此配置与 `.ini + .list` 方案存在差异，不应视为两份完全等价的分流配置。
 
