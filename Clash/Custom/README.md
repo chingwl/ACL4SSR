@@ -236,8 +236,8 @@ DOMAIN-SUFFIX,bitbrowser.net
 
 | 配置段 | 内容 |
 | --- | --- |
-| `[General]` | 系统绕过、DNS、Fake-IP 例外、IPv6、TUN 排除路由和 UDP 行为等 |
-| `[Proxy Group]` | `HK`、`US`、`TW`、`JP` 按节点名称筛选；`Bybit` 使用台湾组；`Google`、`TG` 可选香港或美国；`Talkatone` 只使用美国组；八个组均为手动选择组 |
+| `[General]` | 系统绕过、DNS、IPv6、TUN 排除路由和 UDP 行为等 |
+| `[Proxy Group]` | `US`、`TW` 按节点名称筛选；`Bybit` 默认台湾组；`Google`、`TG`、`Talkatone` 默认美国组；六个组均为手动选择组 |
 | `[Rule]` | 自定义地区分流、广告拦截、国内外服务、局域网及兜底规则 |
 | `[Host]` | `localhost = 127.0.0.1` |
 | `[URL Rewrite]` | 将匹配的 `g.cn`、`google.cn` 请求以 HTTP 302 重定向到 Google |
@@ -245,11 +245,10 @@ DOMAIN-SUFFIX,bitbrowser.net
 关键设置与分流：
 
 - DNS 和备用 DNS 均使用 `system`；启用 IPv6，但不优先使用 IPv6。
-- 配置了部分私有、保留地址的 TUN 排除路由；`100.64.0.0/10` 刻意不在排除列表中，tailnet 路由需留在本隧道内，排除会使内置 Tailscale 模组失效。策略不支持 UDP 转发时拒绝该流量。
-- `always-real-ip = *.jingwl.cn,jingwl.cn,*.881889.xyz,881889.xyz`：Fake-IP 例外，仅在选择 Fake-IP 时生效；返回真实地址才能被 tailnet 路由和 MagicDNS 正确处理；该键是 Shadowrocket 的唯一写法，不存在 `fake-ip-filter`。
+- 配置了部分私有、保留地址的 TUN 排除路由；`100.64.0.0/10` 不在排除列表中，以便由规则处理 Tailscale 特例。策略不支持 UDP 转发时拒绝该流量。
 - 开启直连域名解析失败时使用代理规则的回退行为。
-- `infini.money` 使用 `US`；`881889.xyz` 已从 `US` 改为 `TAILSCALE`，包括 `searxng.881889.xyz`。`JP` 组按节点名称筛选，当前规则中未引用。
-- 自建服务逐域名规则已收敛为后缀规则：`jingwl.cn`、`881889.xyz`、`ts.net` 后缀与 `100.88.88.0/24` 网段统一使用 `TAILSCALE`。`881889.xyz` 子域名公网为 NXDOMAIN，只能在 tailnet 内解析；`jingwl.cn` 的 `portainer`、`bw`、`yy-dm` 解析到 `100.88.88.3`、`freshrss` 解析到 `100.88.88.8`，而顶域、`www`、`open-webui` 解析为公网 `39.105.83.184`，这部分走 tailnet 需该主机在 tailnet 内可达，否则要为其单独加回例外。该网段特例先于后面的 `100.64.0.0/10,DIRECT`，其余 CGNAT 地址默认直连。IP 规则使用 `no-resolve`，用于覆盖 App 直接按 IP 访问的场景。
+- `infini.money` 使用 `US`；整个 `881889.xyz` 后缀使用 `US`。该后缀下的子域名并不同源：`n.881889.xyz`、`one-api.881889.xyz` 公网解析到 Cloudflare CDN（`104.21.63.9`、`172.67.142.12`），属公网服务；`www`、`searxng` 公网无记录。因此不能把该后缀当作自建 tailnet 服务统一改写。
+- `100.88.88.0/24` 和五个自建服务域名使用 `US`（含 `yy-dm.jingwl.cn`）。网段特例先于后面的 `100.64.0.0/10,DIRECT`，其余 CGNAT 地址默认直连。`*.jingwl.cn` 为泛解析，顶域与未单独指定的子域名均指向公网 `39.105.83.184`；只有 `portainer`、`bw`、`yy-dm` 指向 `100.88.88.3`、`freshrss` 指向 `100.88.88.8`，即仅这四个主机名的目标地址在 tailnet 内（2026-10-27 公网 DNS 查询结果）。
 - AI 规则统一绑定 `US`，覆盖 ChatGPT、Sora、Claude、Gemini、NotebookLM、Copilot、Cursor、OpenRouter、Perplexity、Coze、Grok 等已列出的服务及相关接口。国内的 `qwen.ai` 单独配置为 `DIRECT`。
 - AI 规则先于 Microsoft、Google 和通用代理规则，避免 Gemini、Copilot 等先命中其他策略。ChatGPT 原有依赖域名及 IP 规则也改为 `US`；其中包含 `auth0.com`、`sentry.io`、`stripe.com` 等共享服务，其他应用访问这些匹配目标时也会使用美国组，并非仅影响 AI 请求。
 - `live.com`、`microsoft.com` 使用 `PROXY`，其中先命中 AI 规则的 Copilot 子域名例外使用 `US`；`office365.com`、`outlook.com` 等仍沿用已有直连策略。
@@ -261,13 +260,13 @@ DOMAIN-SUFFIX,bitbrowser.net
 - `adspower.net`、`bitbrowser.net` 后缀使用 `PROXY`，同步自 `Custom/Proxy.list`，先于国内域名和 `GEOIP,CN` 直连规则，避免解析到国内 IP 时被判为直连。
 - `quickconnect.to`、`juchats.com` 使用 `DIRECT`；`quickconnect.cn` 已由 `.cn` 后缀直连规则覆盖。群晖的 `synology.com`、`synology.me` 后缀使用 `DIRECT`，分别依据 `ChinaDomain.list`、`UnBan.list`；若使用海外 NAS，应将 `synology.me` 规则缩小为需要直连的具体主机名。
 - GitHub 明确覆盖 `github.com`、`github.io`、`githubapp.com`、`githubassets.com`、`githubusercontent.com` 并使用 `PROXY`；Copilot 的前置精确规则例外使用 `US`。Docker 的 `docker.com`、`docker.io`、`dockerhub.com`、`compose-spec.io` 使用 `PROXY`。
-- 非 AI 的 Google、YouTube 使用 `Google` 组，Telegram 使用 `TG` 组，两组均可手动选择 `HK` 或 `US`。`googleapis.cn`、`gstatic.cn` 仍优先命中 `.cn` 后缀直连规则，未改为代理。
+- 非 AI 的 Google、YouTube 使用 `Google` 组，Telegram 使用 `TG` 组，两组当前均只列出 `US` 一项。`googleapis.cn`、`gstatic.cn` 仍优先命中 `.cn` 后缀直连规则，未改为代理。
 - 苹果资源、本地域名、IPv4 局域网与保留地址、IPv6 的 `::1/128`、`fc00::/7`、`fe80::/10` 以及 `GEOIP,CN` 使用 `DIRECT`，IP 规则使用 `no-resolve`。其他已列出的社交平台等仍使用 `PROXY`。
 - 最终规则为 `FINAL,PROXY`，未命中前面规则的流量使用代理。
 
-**Tailscale 使用前提：** 需在 **设置 → Tailscale** 启用全局隧道模组（≥ 2.2.89，需填认证密钥或登录）；模组开关属于 App 设置，配置文件无法写入，导入后仍需手动开启。模组承担 tailnet 路由，因此 `100.64.0.0/10` 不能出现在 `tun-excluded-routes`，官方手册亦有同样提示；若该网段被排除，`TAILSCALE` 策略与自建服务均不可达。iOS/macOS 同时只能有一个活动 VPN，所以不要再另开 Tailscale App；若 NAS 是通过子网路由接入的，需另开启模组的「使用 Tailscale 子网」。导入后建议验证：`portainer.jingwl.cn` 命中 `TAILSCALE`、`100.88.88.3` 可达、`searxng.881889.xyz` 是否可解析并可达（公网 NXDOMAIN，只能依靠 tailnet DNS）、`open-webui.jingwl.cn` 等公网解析的子域名是否仍可访问、AI 与国内分流不受影响；未命中规则的其他 CGNAT 地址由后置 `100.64.0.0/10,DIRECT` 兜底。系统路由与实际接管行为仍需实机日志确认。
+**Tailscale 使用前提：** 当前采用**节点回程**架构：`portainer`、`bw`、`yy-dm`、`freshrss` 的目标地址在 tailnet，但是由 `US` 节点去连接，因此 `US` 里选中的节点必须本身在 tailnet 内并能路由到 `100.88.88.0/24`；本机配置不会自动建立 Tailscale 连接。`100.64.0.0/10` 保持在 TUN 内（不写入 `tun-excluded-routes`），否则无论走节点还是走内置 Tailscale 模组，该网段都会被绕过。已尝试改用内置模组的 `TAILSCALE` 策略，实测导致 `100.88.88.x` 与公网服务均不可达（模组未生效），因此回退；若后续想走模组，需先在 **设置 → Tailscale** 启用并确认 `100.88.88.3` 可达，再逐条改写确实只存在于 tailnet 的主机名，不要按后缀批量改。导入后建议验证 `portainer.jingwl.cn:8443`、`bw.jingwl.cn:8443` 可达、该 `/10` 内其他地址走 `DIRECT`，并检查自建、AI 与国内分流的匹配日志。
 
-文件不包含具体节点定义，需要配合 Shadowrocket 中已有的节点或订阅。`HK`、`US` 分别按节点名称中的 `HK`、`US` 筛选，默认选择名称分别为 `自建|HK-直连`、`自建|US-DMIT-直连`；筛选条件不验证实际出口地区，AI 使用美国出口的前提是 `US` 组中选中了实际美国节点。此配置与 `.ini + .list` 方案存在差异，不应视为两份完全等价的分流配置。
+文件不包含具体节点定义，需要配合 Shadowrocket 中已有的节点或订阅。`US`、`TW` 分别按节点名称中的 `US`、`TW` 筛选，`US` 默认选择 `自建|US-DMIT-直连`；筛选条件不验证实际出口地区，AI 使用美国出口的前提是 `US` 组中选中了实际美国节点。此配置与 `.ini + .list` 方案存在差异，不应视为两份完全等价的分流配置。
 
 ### 10. StashOverride.yml
 
