@@ -237,7 +237,7 @@ DOMAIN-SUFFIX,bitbrowser.net
 | 配置段 | 内容 |
 | --- | --- |
 | `[General]` | 系统绕过、DNS、IPv6、TUN 排除路由和 UDP 行为等 |
-| `[Proxy Group]` | `US`、`TW` 按节点名称筛选；`Bybit` 默认台湾组；`Google`、`TG`、`Talkatone` 默认美国组；六个组均为手动选择组 |
+| `[Proxy Group]` | 仅 `Bybit` 一个手动选择组，按节点名称筛选台湾相关节点；其余规则直接使用 `PROXY`、`DIRECT`、`REJECT` |
 | `[Rule]` | 自定义地区分流、广告拦截、国内外服务、局域网及兜底规则 |
 | `[Host]` | `localhost = 127.0.0.1` |
 | `[URL Rewrite]` | 将匹配的 `g.cn`、`google.cn` 请求以 HTTP 302 重定向到 Google |
@@ -247,26 +247,26 @@ DOMAIN-SUFFIX,bitbrowser.net
 - DNS 和备用 DNS 均使用 `system`；启用 IPv6，但不优先使用 IPv6。
 - 配置了部分私有、保留地址的 TUN 排除路由；`100.64.0.0/10` 不在排除列表中，以便由规则处理 Tailscale 特例。策略不支持 UDP 转发时拒绝该流量。
 - 开启直连域名解析失败时使用代理规则的回退行为。
-- `infini.money` 使用 `US`；整个 `881889.xyz` 后缀使用 `US`。该后缀下的子域名并不同源：`n.881889.xyz`、`one-api.881889.xyz` 公网解析到 Cloudflare CDN（`104.21.63.9`、`172.67.142.12`），属公网服务；`www`、`searxng` 公网无记录。因此不能把该后缀当作自建 tailnet 服务统一改写。
-- `100.88.88.0/24` 和五个自建服务域名使用 `US`（含 `yy-dm.jingwl.cn`）。网段特例先于后面的 `100.64.0.0/10,DIRECT`，其余 CGNAT 地址默认直连。`*.jingwl.cn` 为泛解析，顶域与未单独指定的子域名均指向公网 `39.105.83.184`；只有 `portainer`、`bw`、`yy-dm` 指向 `100.88.88.3`、`freshrss` 指向 `100.88.88.8`，即仅这四个主机名的目标地址在 tailnet 内（2026-10-27 公网 DNS 查询结果）。
-- AI 规则统一绑定 `US`，覆盖 ChatGPT、Sora、Claude、Gemini、NotebookLM、Copilot、Cursor、OpenRouter、Perplexity、Coze、Grok 等已列出的服务及相关接口。国内的 `qwen.ai` 单独配置为 `DIRECT`。
-- AI 规则先于 Microsoft、Google 和通用代理规则，避免 Gemini、Copilot 等先命中其他策略。ChatGPT 原有依赖域名及 IP 规则也改为 `US`；其中包含 `auth0.com`、`sentry.io`、`stripe.com` 等共享服务，其他应用访问这些匹配目标时也会使用美国组，并非仅影响 AI 请求。
-- `live.com`、`microsoft.com` 使用 `PROXY`，其中先命中 AI 规则的 Copilot 子域名例外使用 `US`；`office365.com`、`outlook.com` 等仍沿用已有直连策略。
-- Talkatone 业务域名、通话地址及 `tenor.com` 使用 `Talkatone` 组；列出的广告域名使用 `REJECT`。HTTP/3、QUIC 拦截规则被注释，未启用。
+- `infini.money` 与整个 `881889.xyz` 后缀使用 `PROXY`。该后缀下的子域名并不同源：`n.881889.xyz`、`one-api.881889.xyz` 公网解析到 Cloudflare CDN（`104.21.63.9`、`172.67.142.12`），属公网服务；`www`、`searxng` 公网无记录。因此不能把该后缀当作自建 tailnet 服务统一改写。
+- `100.88.88.0/24` 和五个自建服务域名使用 `PROXY`（含 `yy-dm.jingwl.cn`）。网段特例先于后面的 `100.64.0.0/10,DIRECT`，其余 CGNAT 地址默认直连。`*.jingwl.cn` 为泛解析，顶域与未单独指定的子域名均指向公网 `39.105.83.184`；只有 `portainer`、`bw`、`yy-dm` 指向 `100.88.88.3`、`freshrss` 指向 `100.88.88.8`，即仅这四个主机名的目标地址在 tailnet 内（2026-10-27 公网 DNS 查询结果）。
+- AI 规则统一绑定 `PROXY`，覆盖 ChatGPT、Sora、Claude、Gemini、NotebookLM、Copilot、Cursor、OpenRouter、Perplexity、Coze、Grok 等已列出的服务及相关接口。国内的 `qwen.ai` 单独配置为 `DIRECT`。
+- AI 规则先于 Microsoft、Google 和通用代理规则，避免 Gemini、Copilot 等先命中其他策略。ChatGPT 原有依赖域名及 IP 规则同上；其中包含 `auth0.com`、`sentry.io`、`stripe.com` 等共享服务，其他应用访问这些匹配目标时也会走代理，并非仅影响 AI 请求。`paypal.com`、`paypalobjects.com` 同样由原来的美国组改为 `PROXY`。
+- `live.com`、`microsoft.com` 使用 `PROXY`，先命中 AI 规则的 Copilot 子域名结果也是 `PROXY`；`office365.com`、`outlook.com` 等仍沿用已有直连策略。
+- Talkatone 业务域名、通话地址及 `tenor.com` 使用 `PROXY`；列出的广告域名使用 `REJECT`。HTTP/3、QUIC 拦截规则被注释，未启用。
 - 国内直连规则补充了阿里云、百度网盘、Bilibili 视频、抖音及字节资源、腾讯邮箱、微信、开发与知识网站等常用域名，以及京东、快手、爱奇艺、大众点评、腾讯云、七牛、国内公共资源和验证码服务的相关域名，主要依据仓库的 `ChinaDomain.list`，并非全量合并。爱奇艺域名修正为 `71.am`；搜狐相关的 `v-56.com` 保持原有正确配置。
 - Oracle 甲骨文规则与 `Custom/Oracle.list` 内容一致，共 197 条，接入国内直连块末尾；原单条 `oracle.com` 直连规则已并入该段，`oraclecloud.com`（原由 `ProxyGFWlist.list` 提供代理）改为直连，不再受 `FINAL,PROXY` 影响。
 - Bilibili 视频 CDN 精确域名 `upos-hz-mirrorakam.akamaized.net` 使用 `DIRECT`，来源为 `Ruleset/Bilibili.list`；该规则先于后置的 `DOMAIN-KEYWORD,aka,PROXY`，避免视频资源被关键词规则分流到代理。
 - 运营商一键登录补充 `cmpassport.com`、`id6.me`、`mob.com` 后缀及 `enrichgw.10010.com`、`nishub1.10010.com` 精确域名直连，来源为 `Ruleset/ChinaOneKeyLogin.list`；不保证登录一定成功，实际仍取决于蜂窝网络和应用实现。
 - `adspower.net`、`bitbrowser.net` 后缀使用 `PROXY`，同步自 `Custom/Proxy.list`，先于国内域名和 `GEOIP,CN` 直连规则，避免解析到国内 IP 时被判为直连。
 - `quickconnect.to`、`juchats.com` 使用 `DIRECT`；`quickconnect.cn` 已由 `.cn` 后缀直连规则覆盖。群晖的 `synology.com`、`synology.me` 后缀使用 `DIRECT`，分别依据 `ChinaDomain.list`、`UnBan.list`；若使用海外 NAS，应将 `synology.me` 规则缩小为需要直连的具体主机名。
-- GitHub 明确覆盖 `github.com`、`github.io`、`githubapp.com`、`githubassets.com`、`githubusercontent.com` 并使用 `PROXY`；Copilot 的前置精确规则例外使用 `US`。Docker 的 `docker.com`、`docker.io`、`dockerhub.com`、`compose-spec.io` 使用 `PROXY`。
-- 非 AI 的 Google、YouTube 使用 `Google` 组，Telegram 使用 `TG` 组，两组当前均只列出 `US` 一项。`googleapis.cn`、`gstatic.cn` 仍优先命中 `.cn` 后缀直连规则，未改为代理。
+- GitHub 明确覆盖 `github.com`、`github.io`、`githubapp.com`、`githubassets.com`、`githubusercontent.com` 并使用 `PROXY`。Docker 的 `docker.com`、`docker.io`、`dockerhub.com`、`compose-spec.io` 使用 `PROXY`。
+- 非 AI 的 Google、YouTube 与 Telegram 均直接使用 `PROXY`，不再有独立的地区组。`googleapis.cn`、`gstatic.cn` 仍优先命中 `.cn` 后缀直连规则，未改为代理。
 - 苹果资源、本地域名、IPv4 局域网与保留地址、IPv6 的 `::1/128`、`fc00::/7`、`fe80::/10` 以及 `GEOIP,CN` 使用 `DIRECT`，IP 规则使用 `no-resolve`。其他已列出的社交平台等仍使用 `PROXY`。
 - 最终规则为 `FINAL,PROXY`，未命中前面规则的流量使用代理。
 
-**Tailscale 使用前提：** 当前采用**节点回程**架构：`portainer`、`bw`、`yy-dm`、`freshrss` 的目标地址在 tailnet，但是由 `US` 节点去连接，因此 `US` 里选中的节点必须本身在 tailnet 内并能路由到 `100.88.88.0/24`；本机配置不会自动建立 Tailscale 连接。`100.64.0.0/10` 保持在 TUN 内（不写入 `tun-excluded-routes`），否则无论走节点还是走内置 Tailscale 模组，该网段都会被绕过。已尝试改用内置模组的 `TAILSCALE` 策略，实测导致 `100.88.88.x` 与公网服务均不可达（模组未生效），因此回退；若后续想走模组，需先在 **设置 → Tailscale** 启用并确认 `100.88.88.3` 可达，再逐条改写确实只存在于 tailnet 的主机名，不要按后缀批量改。导入后建议验证 `portainer.jingwl.cn:8443`、`bw.jingwl.cn:8443` 可达、该 `/10` 内其他地址走 `DIRECT`，并检查自建、AI 与国内分流的匹配日志。`open-webui.jingwl.cn` 单独使用 `DIRECT`，即按 `*.jingwl.cn` 泛解析得到的公网地址（`39.105.83.184`）直连；该服务真实监听 `100.88.88.8:23386`，若公网 443 上没有反代，直连也不会可达。家里 DSM 的 `192.168.31.22:5001` 使用后置的 `192.168.0.0/16,DIRECT` 交给系统路由，**前提是 Tailscale 已连接且已接受到 `192.168.31.0/24` 的子网路由**，因此配置不需要专门规则；可用 `route -n get 192.168.31.22` 确认出口是否为 `utun*`。独立 Tailscale 客户端与 Shadowrocket 的系统代理可在 macOS 上共存，但与内置 Tailscale 模组互斥。
+**Tailscale 使用前提：** 当前采用**节点回程**架构：`portainer`、`bw`、`yy-dm`、`freshrss` 的目标地址在 tailnet，但是由 `PROXY` 选中的节点去连接，因此该节点必须本身在 tailnet 内并能路由到 `100.88.88.0/24`；本机配置不会自动建立 Tailscale 连接。`100.64.0.0/10` 保持在 TUN 内（不写入 `tun-excluded-routes`），否则无论走节点还是走内置 Tailscale 模组，该网段都会被绕过。已尝试改用内置模组的 `TAILSCALE` 策略，实测导致 `100.88.88.x` 与公网服务均不可达（模组未生效），因此回退；若后续想走模组，需先在 **设置 → Tailscale** 启用并确认 `100.88.88.3` 可达，再逐条改写确实只存在于 tailnet 的主机名，不要按后缀批量改。导入后建议验证 `portainer.jingwl.cn:8443`、`bw.jingwl.cn:8443` 可达、该 `/10` 内其他地址走 `DIRECT`，并检查自建、AI 与国内分流的匹配日志。`open-webui.jingwl.cn` 单独使用 `DIRECT`，即按 `*.jingwl.cn` 泛解析得到的公网地址（`39.105.83.184`）直连；该服务真实监听 `100.88.88.8:23386`，若公网 443 上没有反代，直连也不会可达。家里 DSM 的 `192.168.31.22:5001` 使用后置的 `192.168.0.0/16,DIRECT` 交给系统路由，**前提是 Tailscale 已连接且已接受到 `192.168.31.0/24` 的子网路由**，因此配置不需要专门规则；可用 `route -n get 192.168.31.22` 确认出口是否为 `utun*`。独立 Tailscale 客户端与 Shadowrocket 的系统代理可在 macOS 上共存，但与内置 Tailscale 模组互斥。
 
-文件不包含具体节点定义，需要配合 Shadowrocket 中已有的节点或订阅。`US`、`TW` 分别按节点名称中的 `US`、`TW` 筛选，`US` 默认选择 `自建|US-DMIT-直连`；筛选条件不验证实际出口地区，AI 使用美国出口的前提是 `US` 组中选中了实际美国节点。此配置与 `.ini + .list` 方案存在差异，不应视为两份完全等价的分流配置。
+文件不包含具体节点定义，需要配合 Shadowrocket 中已有的节点或订阅。仅 `Bybit` 一个策略组，按节点名称中的 `TW`、`台湾`、`台灣`、`Taiwan`、`🇹🇼` 筛选；筛选条件不验证实际出口地区，Bybit 使用台湾出口与 AI 使用美国出口的前提，分别是 `Bybit` 与 `PROXY` 中选中了对应地区的节点。原本指向 `US`、`TW`、`Google`、`TG`、`Talkatone` 的规则已全部改为 `PROXY`，因此这些流量不再能单独切换出口地区。此配置与 `.ini + .list` 方案存在差异，不应视为两份完全等价的分流配置。
 
 ### 10. StashOverride.yml
 
