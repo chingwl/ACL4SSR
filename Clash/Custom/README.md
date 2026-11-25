@@ -249,6 +249,7 @@ DOMAIN-SUFFIX,bitbrowser.net
 - 开启直连域名解析失败时使用代理规则的回退行为。
 - `infini.money` 与整个 `881889.xyz` 后缀使用 `PROXY`。该后缀下的子域名并不同源：`n.881889.xyz`、`one-api.881889.xyz` 公网解析到 Cloudflare CDN（`104.21.63.9`、`172.67.142.12`），属公网服务；`www`、`searxng` 公网无记录。因此不能把该后缀当作自建 tailnet 服务统一改写。
 - `100.88.88.0/24` 和五个自建服务域名使用 `PROXY`（含 `yy-dm.jingwl.cn`）。网段特例先于后面的 `100.64.0.0/10,DIRECT`，其余 CGNAT 地址默认直连。`*.jingwl.cn` 为泛解析，顶域与未单独指定的子域名均指向公网 `39.105.83.184`；只有 `portainer`、`bw`、`yy-dm` 指向 `100.88.88.3`、`freshrss` 指向 `100.88.88.8`，即仅这四个主机名的目标地址在 tailnet 内（2026-10-27 公网 DNS 查询结果）。
+- 富途（Futu）自有域名 `futu5.com`、`futubull.com`、`futuhk.com`、`futuniuniu.com`、`futunn.com`、`moomoo.com` 统一使用 `PROXY`，位置先于国内的直连规则与 `GEOIP,CN`；原 `futu5.com`、`futunn.com` 两条直连规则已移除。富途内嵌的推送、统计等第三方 SDK 域名无法按应用区分，仍由后续规则决定；`futusec.com`、`futunn.net` 为停放域名，`futu.com` 归属不明，均未列入。清单依据域名注册/解析信息整理，实际用到的主机名应以客户端连接日志核对后再补充。
 - AI 规则统一绑定 `PROXY`，覆盖 ChatGPT、Sora、Claude、Gemini、NotebookLM、Copilot、Cursor、OpenRouter、Perplexity、Coze、Grok 等已列出的服务及相关接口。国内的 `qwen.ai` 单独配置为 `DIRECT`。
 - AI 规则先于 Microsoft、Google 和通用代理规则，避免 Gemini、Copilot 等先命中其他策略。ChatGPT 原有依赖域名及 IP 规则同上；其中包含 `auth0.com`、`sentry.io`、`stripe.com` 等共享服务，其他应用访问这些匹配目标时也会走代理，并非仅影响 AI 请求。`paypal.com`、`paypalobjects.com` 同样由原来的美国组改为 `PROXY`。
 - `live.com`、`microsoft.com` 使用 `PROXY`，先命中 AI 规则的 Copilot 子域名结果也是 `PROXY`；`office365.com`、`outlook.com` 等仍沿用已有直连策略。
