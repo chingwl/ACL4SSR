@@ -237,7 +237,7 @@ DOMAIN-SUFFIX,bitbrowser.net
 | 配置段 | 内容 |
 | --- | --- |
 | `[General]` | 系统绕过、DNS、IPv6、TUN 排除路由和 UDP 行为等 |
-| `[Proxy Group]` | 仅 `Bybit` 一个手动选择组，按节点名称筛选台湾相关节点；其余规则直接使用 `PROXY`、`DIRECT`、`REJECT` |
+| `[Proxy Group]` | `Bybit`、`RedotPay` 两个自动测速组，按节点名称筛选香港相关节点；其余规则直接使用 `PROXY`、`DIRECT`、`REJECT` |
 | `[Rule]` | 自定义地区分流、广告拦截、国内外服务、局域网及兜底规则 |
 | `[Host]` | `localhost = 127.0.0.1` |
 | `[URL Rewrite]` | 将匹配的 `g.cn`、`google.cn` 请求以 HTTP 302 重定向到 Google |
@@ -267,7 +267,7 @@ DOMAIN-SUFFIX,bitbrowser.net
 
 **Tailscale 使用前提：** 当前采用**节点回程**架构：`portainer`、`bw`、`yy-dm`、`freshrss` 的目标地址在 tailnet，但是由 `PROXY` 选中的节点去连接，因此该节点必须本身在 tailnet 内并能路由到 `100.88.88.0/24`；本机配置不会自动建立 Tailscale 连接。`100.64.0.0/10` 保持在 TUN 内（不写入 `tun-excluded-routes`），否则无论走节点还是走内置 Tailscale 模组，该网段都会被绕过。已尝试改用内置模组的 `TAILSCALE` 策略，实测导致 `100.88.88.x` 与公网服务均不可达（模组未生效），因此回退；若后续想走模组，需先在 **设置 → Tailscale** 启用并确认 `100.88.88.3` 可达，再逐条改写确实只存在于 tailnet 的主机名，不要按后缀批量改。导入后建议验证 `portainer.jingwl.cn:8443`、`bw.jingwl.cn:8443` 可达、该 `/10` 内其他地址走 `DIRECT`，并检查自建、AI 与国内分流的匹配日志。`open-webui.jingwl.cn` 单独使用 `DIRECT`，即按 `*.jingwl.cn` 泛解析得到的公网地址（`39.105.83.184`）直连；该服务真实监听 `100.88.88.8:23386`，若公网 443 上没有反代，直连也不会可达。家里 DSM 的 `192.168.31.22:5001` 使用后置的 `192.168.0.0/16,DIRECT` 交给系统路由，**前提是 Tailscale 已连接且已接受到 `192.168.31.0/24` 的子网路由**，因此配置不需要专门规则；可用 `route -n get 192.168.31.22` 确认出口是否为 `utun*`。独立 Tailscale 客户端与 Shadowrocket 的系统代理可在 macOS 上共存，但与内置 Tailscale 模组互斥。
 
-文件不包含具体节点定义，需要配合 Shadowrocket 中已有的节点或订阅。仅 `Bybit` 一个策略组，按节点名称中的 `TW`、`台湾`、`台灣`、`Taiwan`、`🇹🇼` 筛选；筛选条件不验证实际出口地区，Bybit 使用台湾出口与 AI 使用美国出口的前提，分别是 `Bybit` 与 `PROXY` 中选中了对应地区的节点。原本指向 `US`、`TW`、`Google`、`TG`、`Talkatone` 的规则已全部改为 `PROXY`，因此这些流量不再能单独切换出口地区。此配置与 `.ini + .list` 方案存在差异，不应视为两份完全等价的分流配置。
+文件不包含具体节点定义，需要配合 Shadowrocket 中已有的节点或订阅。`Bybit`、`RedotPay` 两个策略组，按节点名称中的 `HK`、`香港`、`Hong Kong`、`🇭🇰` 筛选；筛选条件不验证实际出口地区，Bybit 与 RedotPay 使用香港出口与 AI 使用美国出口的前提，分别是这两个组与 `PROXY` 中选中了对应地区的节点。原本指向 `US`、`TW`、`Google`、`TG`、`Talkatone` 的规则已全部改为 `PROXY`，因此这些流量不再能单独切换出口地区。此配置与 `.ini + .list` 方案存在差异，不应视为两份完全等价的分流配置。
 
 ### 10. StashOverride.yml
 
