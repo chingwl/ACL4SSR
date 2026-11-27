@@ -237,7 +237,7 @@ DOMAIN-SUFFIX,bitbrowser.net
 | 配置段 | 内容 |
 | --- | --- |
 | `[General]` | 系统绕过、DNS、IPv6、TUN 排除路由和 UDP 行为等 |
-| `[Proxy Group]` | `Bybit`、`RedotPay` 两个手动选择组，按节点名称筛选香港相关节点；其余规则直接使用 `PROXY`、`DIRECT`、`REJECT` |
+| `[Proxy Group]` | `Bybit`、`RedotPay` 两个手动选择组，按节点名称筛选香港相关节点并排除中转类节点；其余规则直接使用 `PROXY`、`DIRECT`、`REJECT` |
 | `[Rule]` | 自定义地区分流、广告拦截、国内外服务、局域网及兜底规则 |
 | `[Host]` | `localhost = 127.0.0.1` |
 | `[URL Rewrite]` | 将匹配的 `g.cn`、`google.cn` 请求以 HTTP 302 重定向到 Google |
@@ -252,7 +252,7 @@ DOMAIN-SUFFIX,bitbrowser.net
 - 富途（Futu）自有域名 `futu5.com`、`futubull.com`、`futuhk.com`、`futuniuniu.com`、`futunn.com`、`moomoo.com` 统一使用 `PROXY`，位置先于国内的直连规则与 `GEOIP,CN`；原 `futu5.com`、`futunn.com` 两条直连规则已移除。富途内嵌的推送、统计等第三方 SDK 域名无法按应用区分，仍由后续规则决定；`futusec.com`、`futunn.net` 为停放域名，`futu.com` 归属不明，均未列入。清单依据域名注册/解析信息整理，实际用到的主机名应以客户端连接日志核对后再补充。
 - AI 规则统一绑定 `PROXY`，覆盖 ChatGPT、Sora、Claude、Gemini、NotebookLM、Copilot、Cursor、OpenRouter、Perplexity、Coze、Grok 等已列出的服务及相关接口。国内的 `qwen.ai` 单独配置为 `DIRECT`。
 - AI 规则先于 Microsoft、Google 和通用代理规则，避免 Gemini、Copilot 等先命中其他策略。ChatGPT 原有依赖域名及 IP 规则同上；其中包含 `auth0.com`、`sentry.io`、`stripe.com` 等共享服务，其他应用访问这些匹配目标时也会走代理，并非仅影响 AI 请求。`paypal.com`、`paypalobjects.com` 同样由原来的美国组改为 `PROXY`。
-- `live.com`、`microsoft.com` 使用 `PROXY`，先命中 AI 规则的 Copilot 子域名结果也是 `PROXY`；`office365.com`、`outlook.com` 等仍沿用已有直连策略。
+- Bybit 与 RedotPay 的地区筛选正则带一层排除：先过滤名称含中转、中轉、中继、中継、relay、入口、前置的节点。这类名称里的地区标记表示入口或中继而非出口，例如 `US-ZGO-中转HK` 实际是美国出口，若不排除就会被当成香港节点选中。
 - Talkatone 业务域名、通话地址及 `tenor.com` 使用 `PROXY`；列出的广告域名使用 `REJECT`。HTTP/3、QUIC 拦截规则被注释，未启用。
 - 国内直连规则补充了阿里云、百度网盘、Bilibili 视频、抖音及字节资源、腾讯邮箱、微信、开发与知识网站等常用域名，以及京东、快手、爱奇艺、大众点评、腾讯云、七牛、国内公共资源和验证码服务的相关域名，主要依据仓库的 `ChinaDomain.list`，并非全量合并。爱奇艺域名修正为 `71.am`；搜狐相关的 `v-56.com` 保持原有正确配置。
 - Oracle 甲骨文规则与 `Custom/Oracle.list` 内容一致，共 197 条，接入国内直连块末尾；原单条 `oracle.com` 直连规则已并入该段，`oraclecloud.com`（原由 `ProxyGFWlist.list` 提供代理）改为直连，不再受 `FINAL,PROXY` 影响。
@@ -267,7 +267,7 @@ DOMAIN-SUFFIX,bitbrowser.net
 
 **Tailscale 使用前提：** 当前采用**节点回程**架构：`portainer`、`bw`、`yy-dm`、`freshrss` 的目标地址在 tailnet，但是由 `PROXY` 选中的节点去连接，因此该节点必须本身在 tailnet 内并能路由到 `100.88.88.0/24`；本机配置不会自动建立 Tailscale 连接。`100.64.0.0/10` 保持在 TUN 内（不写入 `tun-excluded-routes`），否则无论走节点还是走内置 Tailscale 模组，该网段都会被绕过。已尝试改用内置模组的 `TAILSCALE` 策略，实测导致 `100.88.88.x` 与公网服务均不可达（模组未生效），因此回退；若后续想走模组，需先在 **设置 → Tailscale** 启用并确认 `100.88.88.3` 可达，再逐条改写确实只存在于 tailnet 的主机名，不要按后缀批量改。导入后建议验证 `portainer.jingwl.cn:8443`、`bw.jingwl.cn:8443` 可达、该 `/10` 内其他地址走 `DIRECT`，并检查自建、AI 与国内分流的匹配日志。`open-webui.jingwl.cn` 单独使用 `DIRECT`，即按 `*.jingwl.cn` 泛解析得到的公网地址（`39.105.83.184`）直连；该服务真实监听 `100.88.88.8:23386`，若公网 443 上没有反代，直连也不会可达。家里 DSM 的 `192.168.31.22:5001` 使用后置的 `192.168.0.0/16,DIRECT` 交给系统路由，**前提是 Tailscale 已连接且已接受到 `192.168.31.0/24` 的子网路由**，因此配置不需要专门规则；可用 `route -n get 192.168.31.22` 确认出口是否为 `utun*`。独立 Tailscale 客户端与 Shadowrocket 的系统代理可在 macOS 上共存，但与内置 Tailscale 模组互斥。
 
-文件不包含具体节点定义，需要配合 Shadowrocket 中已有的节点或订阅。`Bybit`、`RedotPay` 两个策略组，按节点名称中的 `HK`、`香港`、`Hong Kong`、`🇭🇰` 筛选后由用户手动选择具体节点，不再自动测速；筛选条件不验证实际出口地区，Bybit 与 RedotPay 使用香港出口与 AI 使用美国出口的前提，分别是这两个组与 `PROXY` 中选中了对应地区的节点。原本指向 `US`、`TW`、`Google`、`TG`、`Talkatone` 的规则已全部改为 `PROXY`，因此这些流量不再能单独切换出口地区。此配置与 `.ini + .list` 方案存在差异，不应视为两份完全等价的分流配置。
+文件不包含具体节点定义，需要配合 Shadowrocket 中已有的节点或订阅。`Bybit`、`RedotPay` 两个策略组，按节点名称中的 `HK`、`香港`、`Hong\s?[Kk]ong`、`🇭🇰` 筛选，先排除名称含中转、中轉、中继、中継、relay、入口、前置的节点，再由用户手动选择具体节点；筛选条件不验证实际出口地区，Bybit 与 RedotPay 使用香港出口与 AI 使用美国出口的前提，分别是这两个组与 `PROXY` 中选中了对应地区的节点。原本指向 `US`、`TW`、`Google`、`TG`、`Talkatone` 的规则已全部改为 `PROXY`，因此这些流量不再能单独切换出口地区。此配置与 `.ini + .list` 方案存在差异，不应视为两份完全等价的分流配置。
 
 ### 10. StashOverride.yml
 
